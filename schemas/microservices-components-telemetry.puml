@@ -1,0 +1,23 @@
+@startuml
+    !include <C4/C4_Container.puml>
+    !include <C4/C4_Component.puml>
+
+    LAYOUT_WITH_LEGEND()
+
+    Container_Boundary(TelemetryService, "Telemetry Service") {
+        Component(TelemetryServiceAPI, "Telemetry Service API", "golang", "Handle API Calls")
+        Component(TelemetrySubscriber, "Telemetry Subscriber", "golang", "Subscribes on device events")
+    }
+
+    ContainerDb(DeviceDB, "Telemetry Database", "Redis", "Store the telemetry data")
+    Container(DeviceService, "Device Service", "golang", "Manage the devices")
+
+    SystemQueue(AppQueue, "Event Bus", "Apache Kafka")
+
+    Rel(DeviceService, TelemetryServiceAPI, "Uses")
+    Rel(TelemetryServiceAPI, TelemetrySubscriber, "Uses")
+    Rel(TelemetrySubscriber, DeviceDB, "Uses")
+    Rel(TelemetryServiceAPI, DeviceDB, "Uses")
+    Rel(TelemetrySubscriber, AppQueue, "Uses")
+
+@enduml

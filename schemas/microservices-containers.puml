@@ -1,0 +1,52 @@
+@startuml
+    !include <C4/C4_Container.puml>
+
+    LAYOUT_WITH_LEGEND()
+
+    Person(person, "User", "A person using the SmartSystem")
+    Person(administrator, "Administrator", "Manages the SmartSystem")
+    System_Boundary(SmartHomeSystem, "SmartHome System") {
+        Container(WebApp, "Web Application", "React", "The web application for the smart home")
+        Container(MobileApp, "Mobile Application", "React Native", "The mobile application for the smart home")
+        Container(APIgw, "API Gateway", "Kong", "Manage the API calls")
+
+        Container(DeviceService, "Device Service", "golang", "Manage the devices")
+        ContainerDb(DeviceDB, "Device Database", "PostgreSQL", "Store the device's data")
+
+        Container(TelemetryService, "Telemetry Service", "Manage telemetry data")
+        ContainerDb(TelemetryDb, "Telemetry Database", "Redis", "Store the telemetry data")
+
+        Container(VendorService, "Vendor Service", "golang", "Manage the vendor API calls")
+        ContainerDb(VendorServiceDB, "Vendor Database", "PostgreSQL", "Store the vendor's data")
+
+        Container(UserService, "User Service", "golang", "Manage the user's data")
+        ContainerDb(UserDB, "User Database", "PostgreSQL", "Store the user's data")
+
+        SystemQueue(AppQueue, "Event Bus", "Apache Kafka")
+
+        Rel(WebApp, APIgw, "Uses")
+        Rel(MobileApp, APIgw, "Uses")
+
+        Rel(APIgw, DeviceService, "Uses")
+        Rel(APIgw, UserService, "Uses")
+        Rel(TelemetryService, TelemetryDb, "Uses")
+        Rel(DeviceService, DeviceDB, "Uses")
+        Rel(UserService, UserDB, "Uses")
+        Rel(VendorService, VendorServiceDB, "Uses")
+        Rel(TelemetryService, AppQueue, "Uses")
+
+        BiRel(DeviceService, UserService, "Uses")
+        BiRel(DeviceService, TelemetryService, "Uses")
+        BiRel(AppQueue, DeviceService, "Uses")
+        BiRel(VendorService, AppQueue, "Uses")
+    }
+    System_Ext(VendorAPI, "Vendor API", "The vendor API for the heating system")
+    System_Ext(SmartHomeDevice, "Smart home device", "The smarty home device")
+    Lay_D(VendorService, VendorAPI)
+    Rel(person, MobileApp, "Uses")
+    Rel(person, WebApp, "Uses")
+    Rel(administrator, WebApp, "Uses")
+    Rel(VendorService, VendorAPI,  "Uses")
+    Rel(VendorAPI, SmartHomeDevice, "Uses")
+
+@enduml
