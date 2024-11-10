@@ -1,85 +1,94 @@
-# Базовая настройка
+# Sprint 3
+## Анализ и планирование
 
-## Запуск minikube
+### Функциональность исходного монолита
 
-[Инструкция по установке](https://minikube.sigs.k8s.io/docs/start/)
+Пользователи API могут:
+ - удаленно включать/выключать отопление 
+ - устанавливать желаемую температуру 
+ - просматривать текущую температуру
+ - автоматически управлять отоплением в зависимости от текущей температуры и желаемой температуры (coming soon, see developer's comment: // TODO: Implement automatic temperature maintenance logic in the service layer )
 
-```bash
-minikube start
-```
+### Архитектура исходного монолита
 
-## Добавление токена авторизации GitHub
+ - Язык программирования: Java
+ - База данных: PostgreSQL 
+ - Архитектура: Monolith 
+ - Взаимодействие с пользователем: HTTP, запросы обрабатываются синхронно
+ - Взаимодействие с VendorAPI: отсутствует документация
+ - Масштабируемость: вертикальная 
+ - Развертывание: виртуальная машина, остановка для обслуживания
 
-[Получение токена](https://github.com/settings/tokens/new)
+### Домены и границы контекстов
 
-```bash
-kubectl create secret docker-registry ghcr --docker-server=https://ghcr.io --docker-username=<github_username> --docker-password=<github_token> -n default
-```
+ - Домен: Управление устройствами
+   - контекст: Управление отоплением - включение и выключение отопления
+   - контекст: Управление температурой - установка желаемой температуры
+ - Домен: Мониторинг температуры
+   - контекст: Обработка телеметрии с датчика температуры - получение текущей температуры
 
-## Установка API GW kusk
+### Анализ проблем монолита
+ - Ограниченный функционал (нет возможности добавить новые устройства через API, нет автоматического поддержания температуры)
+ - Низкие масштабируемость, отказоустойчивость и скорость разработки
+ - Зависимость от VendorAPI так как отсутствует собственное производство устройств
 
-[Install Kusk CLI](https://docs.kusk.io/getting-started/install-kusk-cli)
+### Диаграмма контекста
 
-```bash
-kusk cluster install
-```
+![Диаграмма контекста](./images/monolith-context.png)
 
-## Смена адреса образа в helm chart
+файл: [monolith-context.puml](./schemas/monolith-context.puml)
 
-После того как вы сделали форк репозитория и у вас в репозитории отработал GitHub Action. Вам нужно получить адрес образа <https://github.com/><github_username>/architecture-sprint-3/pkgs/container/architecture-sprint-3
+## Проектирование микросервисной архитектуры
 
-Он выглядит таким образом
-```ghcr.io/<github_username>/architecture-sprint-3:latest```
+### Разделение на микросервисы
 
-Замените адрес образа в файле `helm/smart-home-monolith/values.yaml` на полученный файл:
+ - Управление устройствами
+ - Управление пользователями и домами
+ - Управление вызовами внешних API
+ - Мониторинг устройств
 
-```yaml
-image:
-  repository: ghcr.io/<github_username>/architecture-sprint-3
-  tag: latest
-```
+### Диаграмма контейнеров
+Файл в формате documentation-as-code: [microservices-containers.puml](./schemas/microservices-containers.puml)
+(при рендеринге выглядит отвратительно, но в PlantUML работает)
 
-## Настройка terraform
+Более щадащая глаза схема (подготовлена в draw.io):
 
-[Установите Terraform](https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-quickstart#install-terraform)
+![Диаграмма контейнеров](./images/micro-containers.png)
 
-Создайте файл ~/.terraformrc
+### Диаграмма компонентов
 
-```hcl
-provider_installation {
-  network_mirror {
-    url = "https://terraform-mirror.yandexcloud.net/"
-    include = ["registry.terraform.io/*/*"]
-  }
-  direct {
-    exclude = ["registry.terraform.io/*/*"]
-  }
-}
-```
+Компонент управления устройствами
 
-## Применяем terraform конфигурацию
+![Диаграмма компонентов](./images/micro-components-devices.png)
 
-```bash
-cd terraform
-terraform init
-terraform apply
-```
+Компонент телеметрии
 
-## Настройка API GW
+![Диаграмма компонентов](./images/micro-components-telemetry.png)
 
-```bash
-kusk deploy -i api.yaml
-```
+### Диаграмма кода
 
-## Проверяем работоспособность
+![Диаграмма кода](./images/micro-code.png)
 
-```bash
-kubectl port-forward svc/kusk-gateway-envoy-fleet -n kusk-system 8080:80
-curl localhost:8080/hello
-```
+ER-диаграмма данных
 
-## Delete minikube
+![ER-диаграмма](./images/er.png)
 
-```bash
-minikube delete
-```
+
+## API взаимодействия микросервисов
+
+### Управление устройствами
+
+ [Sync API](./api/openapi/device-service.yaml)
+
+ [Async API](./api/asyncapi/device-service-async.yaml)
+
+### Управление телеметрией
+
+ [Sync API](./api/openapi/telemetry-service.yaml)
+
+ [Async API](./api/asyncapi/telemetry-service-async.yaml)
+
+
+### Необязательные задания не выполнялись
+
+

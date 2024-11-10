@@ -1,0 +1,57 @@
+@startuml
+entity User {
+  id
+  username
+}
+
+entity House {
+  id
+  user_id
+  address
+}
+
+entity Vendor {
+  id
+  name
+  api_params
+}
+
+entity VendorDevice {
+  id
+  type
+  vendor_id
+  commands
+}
+
+entity UserAPIKey {
+  id
+  user_id
+  vendor_id
+  api_key
+}
+
+entity Device {
+  id
+  vendor_id
+  vendor_device_id
+  house_id
+  user_api_key
+  status
+}
+
+entity Telemetry {
+  id
+  device_id
+  telemetry_type
+  datetime
+  telemetry_data
+}
+
+House }|-- User
+Device }|-- House
+Device }|-- Vendor
+Telemetry }|-- Device
+VendorDevice }|-- Vendor
+UserAPIKey }|-- User
+UserAPIKey ||-- Device
+@enduml

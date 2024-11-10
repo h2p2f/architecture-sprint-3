@@ -1,0 +1,70 @@
+asyncapi: 3.0.0
+info:
+  title: Device Service Async API
+  version: 1.0.0
+  description: This service send commands to VendorAPI Service and receives results
+channels:
+  commandData:
+    address: vendorAPIService.commandData
+    messages:
+      CommandData:
+        $ref: '#/components/messages/CommandData'
+  resultData:
+    address: vendorAPIService.resultData  # Исправлено
+    messages:
+      ResultData:
+        $ref: '#/components/messages/ResultData'  # Исправлено
+operations:
+  sendCommand:
+    action: send
+    channel:
+      $ref: '#/channels/commandData'
+    messages:
+      - $ref: '#/channels/commandData/messages/CommandData'
+  resultData:
+    action: receive
+    channel:
+      $ref: '#/channels/resultData'
+    messages:
+      - $ref: '#/channels/resultData/messages/ResultData'
+components:
+  messages:
+    CommandData:
+      payload:
+        type: object
+        properties:
+          device_id:
+            type: string
+          vendor_id:
+            type: string
+          user_api_key:
+            type: string
+          command_id:
+            type: string
+          command:
+            type: object
+            additionalProperties:
+              type: string
+          updatedAt:
+            type: string
+            format: date-time
+        required:
+          - device_id
+          - command
+          - updatedAt
+
+    ResultData:
+      payload:
+        type: object
+        properties:
+          command_id:
+            type: string
+          result:
+            type: boolean
+          updatedAt:
+            type: string
+            format: date-time
+        required:
+          - id
+          - result
+          - updatedAt

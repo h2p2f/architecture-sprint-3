@@ -1,0 +1,47 @@
+openapi: 3.1.0
+info:
+  title: Telemetry Service API
+  description: This API allows to get telemetry data
+  version: 1.0.0
+
+paths:
+  /v1/telemetry/device/{deviceId}:
+    get:
+      summary: Get telemetry data by device ID
+      operationId: getTelemetry
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Telemetry data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryData'
+        '404':
+          description: Device not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    TelemetryData:
+      type: object
+      properties:
+        id:
+          type: string
+        telemetry:
+          type: object
+          additionalProperties:
+            type: number
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - telemetry
+        - updatedAt

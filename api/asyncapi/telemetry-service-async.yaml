@@ -1,0 +1,37 @@
+asyncapi: 3.0.0
+info:
+  title: Telemetry Service Async API
+  version: 1.0.0
+  description: This service collects telemetry data
+channels:
+  sensorData:
+    address: telemetryService.sensorData
+    messages:
+      TelemetryData:
+        $ref: '#/components/messages/TelemetryData'
+operations:
+  getTelemetry:
+    action: receive
+    channel:
+      $ref: '#/channels/sensorData'
+    messages:
+      - $ref: '#/channels/sensorData/messages/TelemetryData'
+components:
+  messages:
+    TelemetryData:
+      payload:
+        type: object
+        properties:
+          id:
+            type: string
+          telemetry:
+            type: object
+            additionalProperties:
+              type: number
+          updatedAt:
+            type: string
+            format: date-time
+        required:
+          - id
+          - telemetry
+          - updatedAt

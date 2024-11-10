@@ -1,0 +1,250 @@
+openapi: 3.1.0
+info:
+  title: Device Service API
+  description: This API allows to manage devices
+  version: 1.0.0
+
+paths:
+  /v1/devices:
+    post:
+      summary: Create a new device
+      operationId: createDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeviceRequest'
+      responses:
+        '201':
+          description: The device was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDeviceResponse'
+        '400':
+          description: Bad request
+        '409':
+          description: Conflict
+        '500':
+          description: Internal server error
+  /v1/devices/{deviceId}:
+    get:
+      summary: Get a device by ID
+      operationId: getDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Device not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update a device by ID
+      operationId: updateDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeviceRequest'
+      responses:
+        '200':
+          description: The device was updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateDeviceResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Device not found
+        '500':
+          description: Internal server error
+    delete:
+      summary: Delete a device by ID
+      operationId: deleteDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The device was deleted
+        '404':
+            description: Device not found
+        '500':
+            description: Internal server error
+  /v1/devices/{deviceId}/commands:
+    post:
+      summary: Send commands to a device
+      operationId: operateDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommand'
+      responses:
+        '200':
+          description: The command was sent
+        '400':
+          description: Bad request
+        '404':
+          description: Device not found
+        '500':
+          description: Internal server error
+    get:
+        summary: Get a list of commands for a device
+        operationId: getDeviceCommands
+        parameters:
+          - name: deviceId
+            in: path
+            required: true
+            schema:
+                type: string
+        responses:
+          '200':
+            description: A list of commands
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/DeviceCommandsList'
+          '404':
+            description: Device not found
+          '500':
+            description: Internal server error
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+        vendor_id:
+          type: string
+        owner_id:
+          type: string
+        house_id:
+          type: string
+        status:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - vendor_id
+        - owner_id
+        - house_id
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateDeviceRequest:
+      type: object
+      properties:
+        vendor_id:
+          type: string
+        owner_id:
+          type: string
+        house_id:
+          type: string
+      required:
+        - vendor_id
+        - owner_id
+        - house_id
+
+    CreateDeviceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - createdAt
+
+    UpdateDeviceRequest:
+      type: object
+      properties:
+        owner_id:
+          type: string
+        house_id:
+          type: string
+      required:
+        - owner_id
+        - house_id
+
+    UpdateDeviceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        vendor_id:
+           type: string
+        owner_id:
+            type: string
+        house_id:
+           type: string
+        status:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - vendor_id
+        - owner_id
+        - house_id
+        - status
+        - createdAt
+        - updatedAt
+    DeviceCommandsList:
+      type: object
+      properties:
+        command:
+          type: array
+          items:
+            type: string
+      required:
+          - command
+    DeviceCommand:
+      type: object
+      properties:
+        command:
+          type: string
+      required:
+        - command

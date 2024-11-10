@@ -1,0 +1,15 @@
+@startuml
+    !include <C4/C4_Context.puml>
+
+    LAYOUT_WITH_LEGEND()
+    Person(person, "User", "A person using the SmartHomeMonolith")
+    System(SmartHomeMonolith, "Smart Home Monolith", "The monolithic system for the smart home")
+    System_Ext(VendorAPI, "Vendor API", "The vendor API for the heating system")
+    System_Ext(HeatingSystem, "Home Heating System", "The heating system with temperature sensor")
+
+    Rel(person, SmartHomeMonolith, "Set and get the temperature, turn on/off the heating system")
+    Rel(SmartHomeMonolith, VendorAPI, "Controls the heating system, gets temperature data")
+    Rel(HeatingSystem, VendorAPI, "Puts stats and temperature data")
+    Rel(VendorAPI, HeatingSystem, "Controls the heating system")
+
+@enduml
